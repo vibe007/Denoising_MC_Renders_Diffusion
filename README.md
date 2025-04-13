@@ -17,7 +17,7 @@ Presented at *3DV 2025* [*Link to paper*](https://arxiv.org/abs/2404.00491)
 
 
 ## Training and Inference
-- We trained with batch size 12, which fit on a single A40 GPU. 
+- We trained with batch size 12, which fits on a single A40 GPU. 
 - **Training command:**
 
 ```shell
