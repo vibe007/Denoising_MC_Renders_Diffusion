@@ -7,18 +7,9 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-
+# from torch.nn.attention import SDPBackend, sdpa_kernel
 from .nn import avg_pool_nd, conv_nd, linear, normalization, timestep_embedding, zero_module, get_activation, \
     AttentionPooling
-
-# _FORCE_MEM_EFFICIENT_ATTN = int(os.environ.get('FORCE_MEM_EFFICIENT_ATTN', 0))
-# print('FORCE_MEM_EFFICIENT_ATTN=', _FORCE_MEM_EFFICIENT_ATTN, '@UNET:QKVATTENTION')
-try:
-    from xformers.ops import memory_efficient_attention  # noqa
-    _FORCE_MEM_EFFICIENT_ATTN=1
-except:
-    print('Mem efficient attn not available')
-    _FORCE_MEM_EFFICIENT_ATTN=0
 
 
 
@@ -314,17 +305,35 @@ class QKVAttention(nn.Module):
                 ek, ev = encoder_kv.reshape(bs * self.n_heads, ch * 2, -1).split(ch, dim=1)
                 k = torch.cat([ek, k], dim=-1)
                 v = torch.cat([ev, v], dim=-1)
-        scale = 1 / math.sqrt(math.sqrt(ch))
-        if _FORCE_MEM_EFFICIENT_ATTN:
-            q, k, v = map(lambda t: t.permute(0, 2, 1).contiguous(), (q, k, v))
-            a = memory_efficient_attention(q, k, v)
-            a = a.permute(0, 2, 1)
+        # scale = 1 / math.sqrt(math.sqrt(ch))
+
+        q = q.permute(0, 2, 1)  # [bs * n_heads, length, ch]
+        k = k.permute(0, 2, 1)
+        v = v.permute(0, 2, 1)
+        if q.shape[1] < 10000: #all at once for smaller seq len
+            a = torch.nn.functional.scaled_dot_product_attention(q, k, v, is_causal=False)
         else:
-            weight = torch.einsum(
-                'bct,bcs->bts', q * scale, k * scale
-            )  # More stable with f16 than dividing afterwards
-            weight = torch.softmax(weight.float(), dim=-1).type(weight.dtype)
-            a = torch.einsum('bts,bcs->bct', weight, v)
+            #process in chunks:
+            #Note: VERY slow for large images...xformers memory_efficient_attention was much faster
+            chunk_size = 4096  # Adjust based on your GPU memory
+            chunks = []
+
+            for i in range(0, q.size(1), chunk_size):
+                end = min(i + chunk_size, q.size(1))
+                q_chunk = q[:, i:end, :]
+                k_chunk = k  # Keep full context
+                v_chunk = v  # Keep full context
+                
+                a_chunk = torch.nn.functional.scaled_dot_product_attention(
+                    q_chunk, k_chunk, v_chunk, is_causal=False
+                )
+                chunks.append(a_chunk)
+                
+            a = torch.cat(chunks, dim=1)
+
+        a = a.permute(0, 2, 1)  # [bs * n_heads, ch, length]
+
+
         return a.reshape(bs, -1, length)
 
 

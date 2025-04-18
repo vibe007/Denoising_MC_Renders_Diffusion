@@ -317,12 +317,27 @@ class IFBaseModule:
 
         return model
 
+    # def _get_path_or_download_file_from_hf(self, dir_or_name, filename):
+    #     if dir_or_name in self.available_models:
+    #         cache_dir = os.path.join(self.cache_dir, dir_or_name)
+    #         hf_hub_download(repo_id=f'DeepFloyd/{dir_or_name}', filename=filename, cache_dir=cache_dir,
+    #                         force_filename=filename, token=self.hf_token)
+    #         return os.path.join(cache_dir, filename)
+    #     else:
+    #         return os.path.join(dir_or_name, filename)
+
     def _get_path_or_download_file_from_hf(self, dir_or_name, filename):
         if dir_or_name in self.available_models:
+            # Download to cache dir
             cache_dir = os.path.join(self.cache_dir, dir_or_name)
-            hf_hub_download(repo_id=f'DeepFloyd/{dir_or_name}', filename=filename, cache_dir=cache_dir,
-                            force_filename=filename, token=self.hf_token)
-            return os.path.join(cache_dir, filename)
+            downloaded_file = hf_hub_download(
+                repo_id=f'DeepFloyd/{dir_or_name}', 
+                filename=filename, 
+                cache_dir=cache_dir,
+                force_filename=filename, 
+                token=self.hf_token
+            )
+            return downloaded_file  # Use the actual path returned by hf_hub_download
         else:
             return os.path.join(dir_or_name, filename)
 

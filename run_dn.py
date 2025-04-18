@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 """
-Image Denoising Training Script - Optimized Version
-
-This script trains a denoising diffusion model for image processing with various configuration options.
-It supports both training and evaluation modes, along with checkpointing and metric logging.
-Includes optimizations for performance: torch.compile, memory management, and learning rate scheduling.
+Image Denoising Training Script
 """
 
 import os
@@ -25,8 +21,8 @@ from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts, LinearLR, Sequ
 from typing import Dict, Tuple, List, Optional, Union, Any
 
 # Custom imports
-from noisebase.noisebase.loaders.torch import TrainingSampleLoader_v1 as TrainDataloader
-from noisebase.noisebase.loaders.torch import TestSampleLoader_v1 as TestDataloader
+from noisebase.loaders.torch import TrainingSampleLoader_v1 as TrainDataloader
+from noisebase.loaders.torch import TestSampleLoader_v1 as TestDataloader
 from deepfloyd_if.modules.stage_II import IFStageII
 from dn_utils import _tm, _undoTonemap, get_conditioning, BUFFERS, SRC_CONFIG, TEST32_CONFIG, TEST8_CONFIG
 from loss import *
@@ -95,7 +91,7 @@ class Config:
         p.add('--spp', required=False, default=4, help='spp', type=int)
         p.add('--lr', default=0.00002, type=float, 
               help='learning rate')
-        p.add('--batch_size', default=12, type=int, 
+        p.add('--batch_size', default=10, type=int, 
               help='training batch size')
         p.add('--num_epochs', default=50, type=int, 
               help='number of epochs')
@@ -765,12 +761,11 @@ class Trainer:
         
         logger.info(f"Starting training with {self.args.num_epochs} epochs")
         logger.info(f"Using {self.args.lr_scheduler} learning rate scheduler")
-        
+
         # Validate on different SPP values
         for spp in [2, 32]:
             val_metrics = self.run_inference(-1, spp, 'val')
         
-        # Save best model
         current_psnr = val_metrics['PSNR']
 
         for epoch in range(self.args.num_epochs):

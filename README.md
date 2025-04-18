@@ -11,6 +11,22 @@ Presented at *3DV 2025* [*Link to paper*](https://arxiv.org/abs/2404.00491)
 
 ## Building an Environment
 - Please consult [*DeepFloyd IF*](https://github.com/deep-floyd/IF), from which this code heavily borrows.
+- We were able to build a working environment as follows:
+```shell
+conda create -n palette python=3.11 -y
+conda activate palette
+pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+pip install tqdm numpy omegaconf matplotlib Pillow huggingface_hub transformers accelerate diffusers tokenizers sentencepiece ftfy beautifulsoup4
+pip install git+https://github.com/openai/CLIP.git --no-deps
+pip install configargparse piq opencv-python scikit-image noisebase torchmetrics
+pip install --upgrade pyfvvdp
+pip install --upgrade zarr
+```
+- If training from scratch, you'll want to download the base diffusion model first:
+```shell
+from huggingface_hub import snapshot_download
+snapshot_download("deepfloyd/IF-II-M-v1.0")
+```
 
 ## Dataset
 - We show an example of loading the [*noisebase*](https://github.com/balintio/noisebase) dataset in this repo (11 channels - noisy, albedo, normals, depth, sample count map). Because our denoiser is single-frame only, we modified the noisebase dataloader to create batches of random frames from any sequence instead of the default video-style loading. Our method should train on just about any renderer's outputs. 
