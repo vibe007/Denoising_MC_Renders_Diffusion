@@ -46,13 +46,19 @@ python run_dn.py  --logdir "logs/" --amp  --doCN --data_path /path/to/noisebase/
 If you find this work helpful in your research, please consider citing our paper:
 
 ```shell
-@misc{vavilala2024denoisingmontecarlorenders,
-      title={Denoising Monte Carlo Renders with Diffusion Models}, 
-      author={Vaibhav Vavilala and Rahul Vasanth and David Forsyth},
-      year={2024},
-      eprint={2404.00491},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2404.00491}, 
-}
+@INPROCEEDINGS {11125569,
+author = { Vavilala, Vaibhav and Vasanth, Rahul and Forsyth, David },
+booktitle = { 2025 International Conference on 3D Vision (3DV) },
+title = {{ Denoising Monte Carlo Renders with Diffusion Models }},
+year = {2025},
+volume = {},
+ISSN = {},
+pages = {835-844},
+abstract = { Physically-based renderings contain Monte Carlo noise, with variance that increases as the number of rays per pixel decreases. This noise, while zero-mean for good modern renderers, can have heavy tails (most notably, for scenes containing specular or refractive objects). Learned methods for restoring low fidelity renders are highly developed, because suppressing render noise means one can save compute and use fast renders with few rays per pixel. We demonstrate that a diffusion model can denoise low fidelity renders successfully. Furthermore, our method can be conditioned on a variety of natural render information, and this conditioning helps performance. Quantitative experiments show that our method is competitive with SOTA across a range of sampling rates. Qualitative examination of the reconstructions suggests that the image prior applied by a diffusion method strongly favors reconstructions that are “like” real images - so have straight shadow boundaries, curved specularities and no “fireflies.” },
+keywords = {Training;Monte Carlo methods;Three-dimensional displays;Noise reduction;Noise;Diffusion models;Rendering (computer graphics);Image restoration;Image reconstruction;Videos},
+doi = {10.1109/3DV66043.2025.00082},
+url = {https://doi.ieeecomputersociety.org/10.1109/3DV66043.2025.00082},
+publisher = {IEEE Computer Society},
+address = {Los Alamitos, CA, USA},
+month =mar}
 
